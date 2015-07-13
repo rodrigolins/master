@@ -1,15 +1,34 @@
 from .models import Sensor
+from .models import SensorType
 from .models import Property
+from .models import PropertyType
 from rest_framework import serializers
 
 
-class SensorSerializer(serializers.HyperlinkedModelSerializer):
+class PropertyTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Sensor
-        fields = ('name', 'sensor_model', 'manufacturer', 'min_value', 'max_value')
+        model = PropertyType
+        fields = ('name',)
 
 
 class PropertySerializer(serializers.HyperlinkedModelSerializer):
+    property_type = PropertyTypeSerializer()
+
     class Meta:
         model = Property
-        fields = ('name', 'value', 'unity', 'boundary', 'sensor')
+        fields = ('property_type', 'value', 'unit', 'boundary',)
+
+
+class SensorTypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SensorType
+        fields = ('name',)
+
+
+class SensorSerializer(serializers.HyperlinkedModelSerializer):
+    sensor_type = SensorTypeSerializer()
+    properties = PropertySerializer(many=True)
+
+    class Meta:
+        model = Sensor
+        fields = ('sensor_type', 'model', 'manufacturer', 'properties',)

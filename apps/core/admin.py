@@ -3,31 +3,36 @@ from .models import Sensor
 from .models import Property
 from .models import Log
 from .models import SensorType
+from .models import PropertyType
 # from .forms import SensorModelForm
 
 
 # Register your models here.
+# class HiddenModelAdmin(admin.ModelAdmin):
+#    def get_model_perms(self, *args, **kwargs):
+#        perms = admin.ModelAdmin.get_model_perms(self, *args, **kwargs)
+#        perms['list_hide'] = True
+#        return perms
+# Hides de model from admin menu
+class HiddenModelAdmin(admin.ModelAdmin):
+    def get_model_perms(self, *args, **kwargs):
+        return {}
+
+
 class PropertyInline(admin.TabularInline):
     model = Property
     extra = 1
 
 
-class SensorTypeAdmin(admin.ModelAdmin):
+class SensorTypeAdmin(HiddenModelAdmin):
     list_display = ['name']
 
 admin.site.register(SensorType, SensorTypeAdmin)
 
 
-# class SensorTypeInline(admin.TabularInline):
-#     model = SensorType
-#     # model = SensorType.sensor.through
-
-
 class SensorAdmin(admin.ModelAdmin):
-    list_display = ['name', 'sensor_type', 'sensor_model', 'manufacturer',
-            'min_value', 'max_value']
-    fields = ('name', 'sensor_type', 'sensor_model', 'manufacturer',
-            'min_value', 'max_value')
+    list_display = ['sensor_type', 'model', 'manufacturer']
+    fields = ('sensor_type', 'model', 'manufacturer')
     inlines = (
         PropertyInline,
     )
@@ -36,16 +41,22 @@ class SensorAdmin(admin.ModelAdmin):
 admin.site.register(Sensor, SensorAdmin)
 
 
-class PropertyAdmin(admin.ModelAdmin):
+class PropertyTypeAdmin(HiddenModelAdmin):
+    list_display = ['name']
+
+admin.site.register(PropertyType, PropertyTypeAdmin)
+
+
+class PropertyAdmin(HiddenModelAdmin):
     pass
 
 admin.site.register(Property, PropertyAdmin)
 
 
 class LogAdmin(admin.ModelAdmin):
-    # fields = ('sensor_id', 'latitude', 'longitude', 'value', 'unity')
-    readonly_fields = ['date', 'sensor_id', 'latitude', 'longitude', 'value', 'unity']
-    list_display = ['get_date', 'get_sensor', 'latitude', 'longitude', 'value', 'unity']
+    # fields = ('sensor_id', 'latitude', 'longitude', 'value', 'unit')
+    readonly_fields = ['date', 'sensor_id', 'latitude', 'longitude', 'value', 'unit']
+    list_display = ['get_date', 'get_sensor', 'latitude', 'longitude', 'value', 'unit']
     list_display_links = ('get_date',)
     list_filter = ('date',)
     # readonly_fields = ['date']

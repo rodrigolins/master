@@ -13,26 +13,31 @@ class Sensor(models.Model):
     """
     Description: Sensor Description
     """
-    name = models.CharField(max_length=255)
-    sensor_model = models.CharField(max_length=255)
-    manufacturer = models.CharField(max_length=255)
-    min_value = models.FloatField()
-    max_value = models.FloatField()
     sensor_type = models.ForeignKey(SensorType, related_name='+')
+    model = models.CharField(max_length=255)
+    manufacturer = models.CharField(max_length=255)
 
     def __str__(self):
-        return '%s' % (self.name)
+        return '%s |model: %s' % (self.sensor_type, self.model)
+
+
+class PropertyType(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return '%s' % self.name
 
 
 class Property(models.Model):
     BOUNDARIES = (
-        ('eq', 'Equals'),
-        ('gt', 'Grater than'),
-        ('lt', 'Less than')
+        ('EQ', 'Equals'),
+        ('GT', 'Grater than'),
+        ('LT', 'Less than'),
+        ('DV', 'Deviation')
     )
-    name = models.CharField(max_length=255)
+    property_type = models.ForeignKey(PropertyType, related_name='+')
     value = models.FloatField()
-    unity = models.CharField(max_length=10)
+    unit = models.CharField(max_length=10)
     boundary = models.CharField(max_length=2, choices=BOUNDARIES)
     sensor = models.ForeignKey(Sensor, related_name='properties')
 
@@ -40,7 +45,7 @@ class Property(models.Model):
         verbose_name_plural = 'Properties'
 
     def __str__(self):
-        return '%s: |%s %f %s ' % (self.name, self.boundary, self.value, self.boundary)
+        return '%s: |%s %f %s ' % (self.property_type, self.boundary, self.value, self.boundary)
 
 
 class Log(models.Model):
@@ -48,7 +53,7 @@ class Log(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     value = models.FloatField()
-    unity = models.CharField(max_length=10)
+    unit = models.CharField(max_length=10)
     sensor_id = models.IntegerField()  # Don't want a relationship
     # sensor_type
 
@@ -56,7 +61,5 @@ class Log(models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return '{date:%Y/%m/%d %H:%M:%S} - longitude: {longitude}, latitude: {latitude} - {value:.2f} {unity}' \
-            .format(date=self.date, longitude=self.longitude, latitude=self.latitude, value=self.value, unity=self.unity)
-
-
+        return '{date:%Y/%m/%d %H:%M:%S} - longitude: {longitude}, latitude: {latitude} - {value:.2f} {unit}' \
+            .format(date=self.date, longitude=self.longitude, latitude=self.latitude, value=self.value, unit=self.unit)
